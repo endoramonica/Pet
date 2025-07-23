@@ -1,0 +1,463 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ECommerceSystem</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #f59e0b;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+            --text-color: #334155;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #ffffff;
+        }
+
+        /* Header Styles */
+        .header-container {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: var(--shadow);
+        }
+
+        .top-announcement {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            color: white;
+            padding: 8px 0;
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .main-header {
+            background: white;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+            .logo:hover {
+                color: var(--primary-color);
+                transform: scale(1.05);
+            }
+
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 500px;
+            margin: 0 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px 12px 50px;
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--light-color);
+        }
+
+            .search-input:focus {
+                outline: none;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+                background: white;
+            }
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .header-action {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+            .header-action:hover {
+                background: var(--light-color);
+                color: var(--primary-color);
+                transform: translateY(-1px);
+            }
+
+            .header-action.cart {
+                background: var(--primary-color);
+                color: white;
+                border-radius: 25px;
+                padding: 10px 20px;
+            }
+
+                .header-action.cart:hover {
+                    background: #1d4ed8;
+                    color: white;
+                    transform: translateY(-2px);
+                    box-shadow: var(--shadow);
+                }
+
+        .auth-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .login-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+            .login-btn:hover {
+                background: #1d4ed8;
+                color: white;
+                transform: translateY(-1px);
+                box-shadow: var(--shadow);
+            }
+
+        .logout-btn {
+            background: transparent;
+            color: var(--text-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+            .logout-btn:hover {
+                background: #fee2e2;
+                border-color: #fca5a5;
+                color: #dc2626;
+            }
+
+        .user-greeting {
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        /* Navigation Menu */
+        .nav-menu {
+            background: var(--dark-color);
+            padding: 0;
+            position: relative;
+        }
+
+            .nav-menu::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            }
+
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 16px 24px;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .nav-link::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+                transition: left 0.5s ease;
+            }
+
+            .nav-link:hover::before {
+                left: 100%;
+            }
+
+            .nav-link:hover {
+                color: var(--secondary-color);
+                background: rgba(245, 158, 11, 0.1);
+                transform: translateY(-2px);
+            }
+
+            .nav-link::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                width: 0;
+                height: 3px;
+                background: var(--secondary-color);
+                transition: all 0.3s ease;
+                transform: translateX(-50%);
+            }
+
+            .nav-link:hover::after {
+                width: 80%;
+            }
+
+        /* Loading Animation */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        <<<<<<< HEAD
+
+                ======= > > > > > > > 4273d6e7db21b69a39d2d2c97c21c7d6d841d88f
+        /* Main Content */
+        .main-content {
+            min-height: calc(100vh - 200px);
+            padding: 2rem 0;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, var(--dark-color), #0f172a);
+            color: white;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            padding: 3rem 0 1rem;
+        }
+
+        .footer-section h5 {
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+            font-weight: 600;
+            position: relative;
+        }
+
+            .footer-section h5::after {
+                content: '';
+                position: absolute;
+                bottom: -5px;
+                left: 0;
+                width: 30px;
+                height: 2px;
+                background: var(--secondary-color);
+            }
+
+        .footer-link {
+            color: #cbd5e1;
+            text-decoration: none;
+            padding: 0.25rem 0;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+            .footer-link:hover {
+                color: var(--secondary-color);
+                padding-left: 0.5rem;
+            }
+
+        .footer-contact {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+        }
+
+        .footer-bottom {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem 0;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        <<<<<<< HEAD
+
+
+
+                ======= > > > > > > > 4273d6e7db21b69a39d2d2c97c21c7d6d841d88f
+        /* Utility Classes */
+        .btn-modern {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-modern:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+    </style>
+</head>
+<body>
+    <div class="header-container">
+        <div class="top-announcement">
+            <div class="container text-white text-center py-2 bg-primary">
+                <i class="fas fa-shipping-fast me-2"></i>Miễn phí vận chuyển cho đơn hàng trên 500k
+            </div>
+        </div>
+        <div class="main-header">
+            <div class="container">
+                <div class="d-flex align-items-center justify-content-between flex-wrap">
+                    <div class="d-flex align-items-center mb-2 mb-md-0">
+                        
+                        <a class="logo" asp-controller="Home" asp-action="Index">
+                            <i class="fas fa-store me-2"></i>
+                            <span>ECommerce</span>
+                        </a>
+                    </div>
+                    <div class="search-container flex-grow-1 mx-3">
+                        <i class="fas fa-search search-icon"></i>
+                        <input class="search-input" type="text" placeholder="Tìm kiếm sản phẩm, thương hiệu...">
+                    </div>
+                    <div class="d-flex align-items-center flex-wrap gap-3">
+                        <div class="header-actions">
+                            <a href="#" class="header-action">
+                                <i class="fas fa-phone"></i>
+                                <span class="d-none d-md-inline">1800.2097</span>
+                            </a>
+                            
+                            
+                            <a href="#" class="header-action cart">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Giỏ hàng</span>
+                                <span class="badge bg-danger ms-1">0</span>
+                            </a>
+                            <a href="#" id="dark-mode-toggle" class="btn btn-sm hover-scale magnetic" title="Toggle Theme">
+                                <i class="fas fa-moon">
+                                   
+                                </i>
+                            </a>
+                        </div>
+                        <!-- Login/Register Partial -->
+                        @await Html.PartialAsync("_LoginPartial")
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="nav-menu">
+            <div class="container">
+                <div class="nav-container d-flex flex-wrap">
+                    @if (ViewBag.Categories != null)
+                    {
+                        foreach (var category in ViewBag.Categories as List<ECommerceSystem.Shared.DTOs.Category.CategoryDTO>)
+                        {
+                            <div class="nav-item">
+                                <a href="@Url.Action("Index", "Product", new { categoryId = category.Id })" class="nav-link">
+                                    <i class="fas fa-tag"></i> @category.Name
+                                </a>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </nav>
+    </div>
+    <div class="container">
+        <main role="main" class="main-content">
+            @RenderBody()
+        </main>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/Components/dark-mode-toggle.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#toggle-category').on('click', function () {
+                $('.nav-menu').slideToggle();
+            });
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
