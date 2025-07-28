@@ -10,9 +10,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 #region Swagger (OpenAPI)
 builder.Services.AddEndpointsApiExplorer();
@@ -91,26 +94,34 @@ builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>()
 #endregion
 
 #region Authentication - JWT
-builder.Services.AddAuthentication("Bearer")
-    .AddJwtBearer("Bearer", options =>
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
+        var secretKey = builder.Configuration["Jwt:SecretKey"];
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
-            )
-        };
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = "https://localhost:7068",
+            ValidAudience = "https://localhost:7068",
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
 
-        options.Events = new JwtBearerEvents
+
+            // 🔥 Map ClaimTypes.NameIdentifier
+            NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+
+            RoleClaimType = ClaimTypes.Role
+        };
+    
+
+
+options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
             {
                 var rawToken = context.Request.Headers["Authorization"].FirstOrDefault();
-
                 if (!string.IsNullOrEmpty(rawToken) && !rawToken.StartsWith("Bearer "))
                 {
                     context.Token = rawToken;
@@ -120,6 +131,7 @@ builder.Services.AddAuthentication("Bearer")
             }
         };
     });
+
 #endregion
 
 #region CORS
@@ -143,6 +155,9 @@ builder.Services.AddScoped<UserRepository>();
 
 builder.Services.AddScoped<DataSyncService>();
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<IOnboardingService, OnboardingService>();
+
+
 builder.Services.AddScoped<ICartRepository, CartRepository>(); // ✅ Di chuyển xuống đây
 
 builder.Services.AddControllers();
@@ -170,6 +185,7 @@ app.UseIpRateLimiting();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<OnboardingRestrictionMiddleware>();
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
 #endregion

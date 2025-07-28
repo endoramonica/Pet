@@ -8,8 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace ECommerceSystem.Api.Controllers
 {
-    [Authorize(Roles = "Admin")]
-    [AllowAnonymous] // Cho phép truy cập công khai (GET danh mục)
+    [AllowAnonymous] // Cho phép GET danh mục không cần login
     [Route("api/public/categories")]
     [ApiController]
     public class CategoriesController : ControllerBase

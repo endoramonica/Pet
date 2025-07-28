@@ -3,7 +3,7 @@ using ECommerceSystem.GUI.Controllers;
 
 // Nếu AuthRetryHandler nằm trong namespace này
 using ECommerceSystem.GUI.Services;
-using ECommerceSystem.GUI.Services.ECommerceSystem.GUI.Handlers;
+
 using ECommerceSystem.Shared.Constants;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -124,9 +124,9 @@ static void ConfigureRefit(IServiceCollection services)
       .AddHttpMessageHandler<AuthRetryHandler>()
       .ConfigureHttpClient(SetHttpClient);
 
-    //services.AddRefitClient<IAuthApi>()
-    //   .AddHttpMessageHandler<AuthRetryHandler>()
-    //   .ConfigureHttpClient(SetHttpClient);
+    services.AddRefitClient<IOnboardingApi>()
+       .AddHttpMessageHandler<AuthRetryHandler>()
+       .ConfigureHttpClient(SetHttpClient);
     void SetHttpClient(HttpClient httpClient)
     {
         httpClient.BaseAddress = new Uri(AppConstants.ApiBaseUrl);

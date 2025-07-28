@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ECommerceSystem.Api.Migrations
 {
     [DbContext(typeof(WebDBContext))]
-    partial class WebDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250725023710_FixForOnBoardingPage")]
+    partial class FixForOnBoardingPage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,71 +202,6 @@ namespace ECommerceSystem.Api.Migrations
                     b.ToTable("PaymentReceipts");
                 });
 
-            modelBuilder.Entity("ECommerceSystem.Shared.Entities.Pet", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AdoptionStatus")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Breed")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Gender")
-                        .HasColumnType("int");
-
-                    b.Property<string>("HealthStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PetType")
-                        .HasColumnType("int");
-
-                    b.Property<double>("Price")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Species")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Views")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Pets");
-                });
-
             modelBuilder.Entity("ECommerceSystem.Shared.Entities.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -428,83 +366,6 @@ namespace ECommerceSystem.Api.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("ECommerceSystem.Shared.Entities.UserAdoption", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("AdoptionDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("PetId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PetId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserAdoptions");
-                });
-
-            modelBuilder.Entity("ECommerceSystem.Shared.Entities.UserFavorite", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("PetId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PetId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserFavorites");
-                });
-
-            modelBuilder.Entity("ECommerceSystem.Shared.Entities.UserPet", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PetId")
-                        .HasColumnType("int");
-
-                    b.HasKey("UserId", "PetId");
-
-                    b.HasIndex("PetId");
-
-                    b.ToTable("UserPets");
-                });
-
             modelBuilder.Entity("ECommerceSystem.Api.Data.CartDetail", b =>
                 {
                     b.HasOne("ECommerceSystem.Shared.Entities.Product", "Product")
@@ -568,63 +429,6 @@ namespace ECommerceSystem.Api.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("ECommerceSystem.Shared.Entities.UserAdoption", b =>
-                {
-                    b.HasOne("ECommerceSystem.Shared.Entities.Pet", "Pet")
-                        .WithMany("UserAdoptions")
-                        .HasForeignKey("PetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ECommerceSystem.Shared.Entities.User", "User")
-                        .WithMany("UserAdoptions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Pet");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ECommerceSystem.Shared.Entities.UserFavorite", b =>
-                {
-                    b.HasOne("ECommerceSystem.Shared.Entities.Pet", "Pet")
-                        .WithMany("UserFavorites")
-                        .HasForeignKey("PetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ECommerceSystem.Shared.Entities.User", "User")
-                        .WithMany("UserFavorites")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Pet");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ECommerceSystem.Shared.Entities.UserPet", b =>
-                {
-                    b.HasOne("ECommerceSystem.Shared.Entities.Pet", "Pet")
-                        .WithMany("UserPets")
-                        .HasForeignKey("PetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ECommerceSystem.Shared.Entities.User", "User")
-                        .WithMany("UserPets")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Pet");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("ECommerceSystem.Api.Data.ShoppingCart", b =>
                 {
                     b.Navigation("CartDetails");
@@ -640,27 +444,9 @@ namespace ECommerceSystem.Api.Migrations
                     b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("ECommerceSystem.Shared.Entities.Pet", b =>
-                {
-                    b.Navigation("UserAdoptions");
-
-                    b.Navigation("UserFavorites");
-
-                    b.Navigation("UserPets");
-                });
-
             modelBuilder.Entity("ECommerceSystem.Shared.Entities.Role", b =>
                 {
                     b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("ECommerceSystem.Shared.Entities.User", b =>
-                {
-                    b.Navigation("UserAdoptions");
-
-                    b.Navigation("UserFavorites");
-
-                    b.Navigation("UserPets");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,20 +1,21 @@
 ﻿using ECommerceSystem.Api.Data.Repositories;
+using ECommerceSystem.Shared.DTOs.Models;
+using ECommerceSystem.Shared.DTOs.User;
 using ECommerceSystem.Shared.Entities;
+using ECommerceSystem.Shared.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using ECommerceSystem.Shared.DTOs.Models;
-using ECommerceSystem.Shared.DTOs.User;
 
 namespace ECommerceSystem.Api.Controllers
 {
     [Route("api/auth")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
-    [AllowAnonymous] // Cho phép truy cập công khai (GET danh mục)
+    
+    
     public class AuthController : ControllerBase
     {
         private readonly UserRepository _userRepo;
@@ -26,6 +27,26 @@ namespace ECommerceSystem.Api.Controllers
             _userRepo = userRepo;
             _config = config;
         }
+        [HttpGet("test-claims")]
+        [Authorize]
+        public IActionResult GetClaims()
+        {
+            var claims = User.Claims.Select(c => $"{c.Type} = {c.Value}").ToList();
+            var nameId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var rawNameId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.ToString();
+            var onboardingClaim = User.FindFirst("IsOnboardingCompleted")?.Value;
+
+            return Ok(new
+            {
+                claims,
+                nameIdClaim = nameId,
+                rawNameIdClaim = rawNameId,
+                onboardingCompleted = onboardingClaim,
+                userId = User.TryGetUserId(out var uid) ? uid : (int?)null
+            });
+        }
+
+
 
         // [POST] /api/auth/login
         // Đăng nhập và trả về JWT token nếu hợp lệ
@@ -49,7 +70,9 @@ namespace ECommerceSystem.Api.Controllers
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, role)
+                new Claim(ClaimTypes.Role, role),
+                new Claim("IsOnboardingCompleted", user.IsOnboardingCompleted.ToString().ToLower()) // "true" hoặc "false"
+
             };
 
             // Tạo khóa ký token từ cấu hình
@@ -108,6 +131,7 @@ namespace ECommerceSystem.Api.Controllers
                 CreatedAt = DateTime.UtcNow,
                 IsDeleted = false,
                 PasswordHash = hashedPassword,
+                InterestsJson = "[]",
                 DeviceToken = ""
             };
 

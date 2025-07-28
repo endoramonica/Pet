@@ -16,6 +16,10 @@ public class WebDBContext : DbContext
     public DbSet<Role> Roles { get; set; }
     public DbSet<PaymentReceipt> PaymentReceipts { get; set; }
 
+    public DbSet<Pet> Pets { get; set; }
+    public DbSet<UserFavorite> UserFavorites { get; set; }
+    public DbSet<UserAdoption> UserAdoptions { get; set; }
+    public DbSet<UserPet> UserPets { get; set; }
 
     public DbSet<ShoppingCart> ShoppingCarts { get; set; }
     public DbSet<CartDetail> CartDetails { get; set; }
@@ -24,21 +28,21 @@ public class WebDBContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // 🔁 Precision cho các giá trị tiền
+        // Precision cho các giá trị tiền
         modelBuilder.Entity<Order>().Property(o => o.Total).HasPrecision(18, 2);
         modelBuilder.Entity<OrderItem>().Property(oi => oi.Price).HasPrecision(18, 2);
         modelBuilder.Entity<Product>().Property(p => p.Price).HasPrecision(18, 2);
         modelBuilder.Entity<CartDetail>().Property(c => c.UnitPrice).HasPrecision(18, 2);
-        modelBuilder.Entity<PaymentReceipt>().Property(p => p.TotalAmount).HasPrecision(18, 2); // 👈 THÊM DÒNG NÀY
+        modelBuilder.Entity<PaymentReceipt>().Property(p => p.TotalAmount).HasPrecision(18, 2);
 
-        // 🔁 Cấu hình quan hệ User - Role
+        // Cấu hình quan hệ User - Role
         modelBuilder.Entity<User>()
             .HasOne(u => u.Role)
             .WithMany(r => r.Users)
             .HasForeignKey(u => u.RoleId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // 🔁 ShoppingCart - CartDetail
+        // ShoppingCart - CartDetail
         modelBuilder.Entity<ShoppingCart>()
             .HasMany(c => c.CartDetails)
             .WithOne(d => d.ShoppingCart)
@@ -52,10 +56,52 @@ public class WebDBContext : DbContext
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired(false);
 
-        // ✅ Soft delete filters
+        // Soft delete filters
         modelBuilder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<Product>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<Order>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<OrderItem>().HasQueryFilter(e => !e.IsDeleted);
+
+        // Quan hệ UserFavorite
+        modelBuilder.Entity<UserFavorite>()
+            .HasOne(uf => uf.User)
+            .WithMany(u => u.UserFavorites)
+            .HasForeignKey(uf => uf.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserFavorite>()
+            .HasOne(uf => uf.Pet)
+            .WithMany(p => p.UserFavorites)
+            .HasForeignKey(uf => uf.PetId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Quan hệ UserAdoption
+        modelBuilder.Entity<UserAdoption>()
+            .HasOne(ua => ua.User)
+            .WithMany(u => u.UserAdoptions)
+            .HasForeignKey(ua => ua.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserAdoption>()
+            .HasOne(ua => ua.Pet)
+            .WithMany(p => p.UserAdoptions)
+            .HasForeignKey(ua => ua.PetId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Quan hệ UserPet (n-n giữa User và Pet)
+        modelBuilder.Entity<UserPet>()
+            .HasKey(up => new { up.UserId, up.PetId });
+
+        modelBuilder.Entity<UserPet>()
+            .HasOne(up => up.User)
+            .WithMany(u => u.UserPets)
+            .HasForeignKey(up => up.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserPet>()
+            .HasOne(up => up.Pet)
+            .WithMany(p => p.UserPets)
+            .HasForeignKey(up => up.PetId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

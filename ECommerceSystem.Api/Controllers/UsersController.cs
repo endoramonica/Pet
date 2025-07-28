@@ -1,5 +1,5 @@
-﻿using ECommerceSystem.Api.Data.Repositories;
-using ECommerceSystem.Shared.DTOs.User;
+﻿using ECommerceSystem.Shared.DTOs.User;
+using ECommerceSystem.Api.Data.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -10,7 +10,6 @@ namespace ECommerceSystem.Api.Controllers
     [ApiController]
     [Route("api/admin/users")]
     [Authorize(Roles = "Admin")]
-    [AllowAnonymous] // Cho phép truy cập công khai (GET danh mục)
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -20,10 +19,7 @@ namespace ECommerceSystem.Api.Controllers
             _userService = userService;
         }
 
-        /// <summary>
-        /// [GET] /api/admin/users
-        /// Lấy danh sách toàn bộ người dùng
-        /// </summary>
+        // [GET] /api/admin/users
         [HttpGet]
         public async Task<ActionResult<List<UserDTO>>> GetAll()
         {
@@ -31,59 +27,53 @@ namespace ECommerceSystem.Api.Controllers
             return Ok(users);
         }
 
-        /// <summary>
-        /// [GET] /api/admin/users/{id}
-        /// Lấy thông tin chi tiết của một người dùng theo ID
-        /// </summary>
+        // [GET] /api/admin/users/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDTO>> GetById(string id)
         {
-            var user = await _userService.GetByIdAsync(id);
+            if (!int.TryParse(id, out var userId))
+                return BadRequest("ID không hợp lệ");
+
+            var user = await _userService.GetByIdAsync(userId);
             if (user == null)
                 return NotFound();
             return Ok(user);
         }
 
-        /// <summary>
-        /// [PUT] /api/admin/users/{id}
-        /// Cập nhật thông tin người dùng
-        /// </summary>
+        // [PUT] /api/admin/users/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(string id, [FromBody] UserDTO dto)
         {
+            if (!int.TryParse(id, out var userId))
+                return BadRequest("ID không hợp lệ");
+
             if (id != dto.Id)
-                return BadRequest("Id không khớp");
+                return BadRequest("ID không khớp");
 
-            await _userService.UpdateAsync(id, dto);
-            return NoContent(); // 204
-        }
-
-        /// <summary>
-        /// [DELETE] /api/admin/users/{id}
-        /// Xóa mềm người dùng theo ID
-        /// </summary>
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> SoftDelete(string id)
-        {
-            await _userService.SoftDeleteAsync(id);
+            await _userService.UpdateAsync(userId, dto);
             return NoContent();
         }
 
-        /// <summary>
-        /// [POST] /api/admin/users
-        /// Tạo mới một người dùng
-        /// </summary>
+        // [DELETE] /api/admin/users/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> SoftDelete(string id)
+        {
+            if (!int.TryParse(id, out var userId))
+                return BadRequest("ID không hợp lệ");
+
+            await _userService.SoftDeleteAsync(userId);
+            return NoContent();
+        }
+
+        // [POST] /api/admin/users
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] UserDTO dto)
         {
-            await _userService.CreateAsync(dto); // Yêu cầu đã triển khai trong UserService
+            await _userService.CreateAsync(dto);
             return Ok();
         }
 
-        /// <summary>
-        /// [GET] /api/admin/users/search?name=abc
-        /// Tìm kiếm người dùng theo tên
-        /// </summary>
+        // [GET] /api/admin/users/search?name=abc
         [HttpGet("search")]
         public async Task<ActionResult<List<UserDTO>>> SearchByName([FromQuery] string name)
         {
@@ -91,15 +81,21 @@ namespace ECommerceSystem.Api.Controllers
             return Ok(users);
         }
 
-        /// <summary>
-        /// [POST] /api/admin/users/delete-multiple
-        /// Xóa mềm nhiều người dùng cùng lúc theo danh sách ID
-        /// </summary>
+        // [POST] /api/admin/users/delete-multiple
         [HttpPost("delete-multiple")]
         public async Task<IActionResult> DeleteMultiple([FromBody] List<string> ids)
         {
-            await _userService.SoftDeleteMultipleAsync(ids);
-            return NoContent(); // 204
+            var idInts = new List<int>();
+            foreach (var id in ids)
+            {
+                if (int.TryParse(id, out var intId))
+                    idInts.Add(intId);
+                else
+                    return BadRequest($"ID không hợp lệ: {id}");
+            }
+
+            await _userService.SoftDeleteMultipleAsync(idInts);
+            return NoContent();
         }
     }
 }

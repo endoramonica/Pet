@@ -1,0 +1,35 @@
+﻿@model ECommerceSystem.Shared.DTOs.OnBoarding.OnboardingStep
+@using ECommerceSystem.Shared.DTOs.OnBoarding
+
+@{
+    var steps = Enum.GetValues(typeof(OnboardingStep)).Cast<OnboardingStep>().ToList();
+}
+
+<ul class="step-indicator list-inline">
+    @foreach (var step in steps)
+    {
+        var isActive = step == Model ? "active" : "";
+        <li class="list-inline-item step-item @isActive">@step.ToString()</li>
+    }
+</ul>
+
+<style>
+    .step-indicator {
+        margin-bottom: 20px;
+        padding-left: 0;
+    }
+
+    .step-item {
+        padding: 10px 15px;
+        border-radius: 20px;
+        border: 1px solid #ccc;
+        background-color: #eee;
+        margin-right: 10px;
+    }
+
+        .step-item.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+</style>

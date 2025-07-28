@@ -1,12 +1,12 @@
 ﻿using ECommerceSystem.GUI.Apis;
 using ECommerceSystem.GUI.Models;
+using ECommerceSystem.Shared.DTOs.Category;
 using ECommerceSystem.Shared.DTOs.Product;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System;
 
 namespace ECommerceSystem.GUI.Controllers
 {
@@ -18,45 +18,66 @@ namespace ECommerceSystem.GUI.Controllers
 
         public HomeController(ILogger<HomeController> logger, ICategoryApi categoryApi, IProductApi productApi)
         {
-            _logger = logger;
-            _categoryApi = categoryApi;
-            _productApi = productApi;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _categoryApi = categoryApi ?? throw new ArgumentNullException(nameof(categoryApi));
+            _productApi = productApi ?? throw new ArgumentNullException(nameof(productApi));
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index(int page = 1)
         {
-            int pageSize = 9;
+            const int PageSize = 9;
 
-            var categories = await _categoryApi.GetAllAsync();
+            try
+            {
+                // Lấy danh sách danh mục
+                var categories = await _categoryApi.GetAllAsync() ?? new List<CategoryDTO>();
+                _logger.LogInformation("Fetched {Count} categories successfully.", categories.Count);
 
-            var productResponse = await _productApi.GetProductsAsync(
-                search: null,
-                categoryId: null,
-                minPrice: null,
-                maxPrice: null,
-                sortBy: null,
-                promotion: null,
-                page: page,
-                pageSize: pageSize
-            );
+                // Lấy danh sách sản phẩm với phân trang
+                var productResponse = await _productApi.GetProductsAsync(
+                    search: null,
+                    categoryId: null,
+                    minPrice: null,
+                    maxPrice: null,
+                    sortBy: null,
+                    promotion: null,
+                    page: page,
+                    pageSize: PageSize
+                );
 
-            ViewBag.Categories = categories;
-            ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = (int)Math.Ceiling((double)productResponse.Total / pageSize);
+                if (productResponse == null || productResponse.Products == null)
+                {
+                    _logger.LogWarning("Product response or products list is null.");
+                    return View(new List<ProductDTO>());
+                }
 
-            return View(productResponse.Products);
+              
+
+                return View(productResponse.Products);
+            }
+            
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching data for Index page.");
+                return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            }
         }
+
+        [HttpGet]
         public IActionResult AccessDenied()
         {
             return View();
         }
 
+        [HttpGet]
         public IActionResult Privacy()
         {
             return View();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        [HttpGet]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });

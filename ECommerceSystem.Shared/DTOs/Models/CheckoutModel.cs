@@ -26,5 +26,6 @@ namespace ECommerceSystem.Shared.DTOs.Models
         public int ProductId { get; set; }
         public int Quantity { get; set; } = 1;
     }
+
 }
 

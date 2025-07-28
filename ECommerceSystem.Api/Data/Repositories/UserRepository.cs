@@ -1,7 +1,10 @@
-﻿using ECommerceSystem.Api.Data;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using ECommerceSystem.Api.Data;
 using ECommerceSystem.Shared.DTOs.User;
 using ECommerceSystem.Shared.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ECommerceSystem.Api.Data.Repositories
@@ -66,7 +69,7 @@ namespace ECommerceSystem.Api.Data.Repositories
 
         public async Task CreateUserAsync(User user, string passwordHash)
         {
-            user.PasswordHash = passwordHash; // đã mã hóa ở nơi khác, ví dụ bằng BCrypt.Net
+            user.PasswordHash = passwordHash;
             await _dbContext.Users.AddAsync(user);
             await _dbContext.SaveChangesAsync();
         }
@@ -76,7 +79,7 @@ namespace ECommerceSystem.Api.Data.Repositories
             var role = await GetRoleByName(roleName);
             if (role == null)
             {
-                throw new Exception($"Vai trò '{roleName}' không tồn tại.");
+                throw new System.Exception($"Vai trò '{roleName}' không tồn tại.");
             }
 
             user.RoleId = role.Id;
@@ -87,7 +90,7 @@ namespace ECommerceSystem.Api.Data.Repositories
         {
             return await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
         }
-        // Lấy danh sách tất cả người dùng (ngoại trừ đã xóa)
+
         public async Task<List<UserDTO>> GetAllAsync()
         {
             return await _dbContext.Users
@@ -102,10 +105,9 @@ namespace ECommerceSystem.Api.Data.Repositories
                 }).ToListAsync();
         }
 
-        // Lấy thông tin người dùng theo ID
-        public async Task<UserDTO> GetByIdAsync(string id)
+        public async Task<UserDTO> GetByIdAsync(int id)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id.ToString() == id && !u.IsDeleted);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
             if (user == null) return null;
 
             return new UserDTO
@@ -118,11 +120,10 @@ namespace ECommerceSystem.Api.Data.Repositories
             };
         }
 
-        // Cập nhật thông tin người dùng
-        public async Task UpdateAsync(string id, UserDTO dto)
+        public async Task UpdateAsync(int id, UserDTO dto)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id.ToString() == id && !u.IsDeleted);
-            if (user == null) throw new Exception("Người dùng không tồn tại.");
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
+            if (user == null) throw new System.Exception("Người dùng không tồn tại.");
 
             user.Name = dto.Name;
             user.Email = dto.Email;
@@ -131,47 +132,50 @@ namespace ECommerceSystem.Api.Data.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        // Xóa mềm (soft delete) người dùng
-        public async Task SoftDeleteAsync(string id)
+        public async Task SoftDeleteAsync(int id)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id.ToString() == id);
-            if (user == null) throw new Exception("Người dùng không tồn tại.");
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+            if (user == null) throw new System.Exception("Người dùng không tồn tại.");
 
             user.IsDeleted = true;
             await _dbContext.SaveChangesAsync();
         }
+
         public async Task<List<UserDTO>> SearchByNameAsync(string name)
         {
             return await _dbContext.Users
                 .Where(u => u.Name.Contains(name) && !u.IsDeleted)
-                .Select(u => new UserDTO { Id = u.Id.ToString(), Name = u.Name, Email = u.Email, IsDeleted = u.IsDeleted })
-                .ToListAsync();
+                .Select(u => new UserDTO
+                {
+                    Id = u.Id.ToString(),
+                    Name = u.Name,
+                    Email = u.Email,
+                    IsDeleted = u.IsDeleted
+                }).ToListAsync();
         }
 
-        public async Task SoftDeleteMultipleAsync(List<string> ids)
+        public async Task SoftDeleteMultipleAsync(List<int> ids)
         {
-            var users = await _dbContext.Users.Where(u => ids.Contains(u.Id.ToString())).ToListAsync();
+            var users = await _dbContext.Users.Where(u => ids.Contains(u.Id)).ToListAsync();
             foreach (var user in users)
+            {
                 user.IsDeleted = true;
+            }
 
             await _dbContext.SaveChangesAsync();
         }
-
     }
-
 
     public interface IUserService
     {
         Task<List<UserDTO>> GetAllAsync();
-        Task<UserDTO> GetByIdAsync(string id);
-        Task UpdateAsync(string id, UserDTO dto);
-        Task SoftDeleteAsync(string id);
-        Task CreateAsync(UserDTO dto); // Add this method to fix CS1061
+        Task<UserDTO> GetByIdAsync(int id);
+        Task UpdateAsync(int id, UserDTO dto);
+        Task SoftDeleteAsync(int id);
+        Task CreateAsync(UserDTO dto);
         Task<List<UserDTO>> SearchByNameAsync(string name);
-        Task SoftDeleteMultipleAsync(List<string> ids);
+        Task SoftDeleteMultipleAsync(List<int> ids);
     }
-
-
 
     public class UserService : IUserService
     {
@@ -181,32 +185,26 @@ namespace ECommerceSystem.Api.Data.Repositories
         {
             _userRepo = userRepo;
         }
+
         public Task CreateAsync(UserDTO dto)
         {
-            // Implementation for creating a user
             var user = new User
             {
-                Id = int.Parse(dto.Id), // Assuming Id is a string representation of an integer
+                Id = int.Parse(dto.Id),
                 Email = dto.Email,
                 Name = dto.Name,
                 DeviceToken = dto.DeviceToken,
                 IsDeleted = false,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = null
+                CreatedAt = System.DateTime.UtcNow
             };
-            return _userRepo.CreateUserAsync(user, "hashed_password"); // Replace with actual password hashing logic
+            return _userRepo.CreateUserAsync(user, "hashed_password");
         }
-       
 
         public Task<List<UserDTO>> GetAllAsync() => _userRepo.GetAllAsync();
-
-        public Task<UserDTO> GetByIdAsync(string id) => _userRepo.GetByIdAsync(id);
-
-        public Task UpdateAsync(string id, UserDTO dto) => _userRepo.UpdateAsync(id, dto);
-
-        public Task SoftDeleteAsync(string id) => _userRepo.SoftDeleteAsync(id);
+        public Task<UserDTO> GetByIdAsync(int id) => _userRepo.GetByIdAsync(id);
+        public Task UpdateAsync(int id, UserDTO dto) => _userRepo.UpdateAsync(id, dto);
+        public Task SoftDeleteAsync(int id) => _userRepo.SoftDeleteAsync(id);
         public Task<List<UserDTO>> SearchByNameAsync(string name) => _userRepo.SearchByNameAsync(name);
-        public Task SoftDeleteMultipleAsync(List<string> ids) => _userRepo.SoftDeleteMultipleAsync(ids);
+        public Task SoftDeleteMultipleAsync(List<int> ids) => _userRepo.SoftDeleteMultipleAsync(ids);
     }
-
 }

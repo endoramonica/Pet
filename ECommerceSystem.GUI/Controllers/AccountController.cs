@@ -38,65 +38,55 @@ namespace ECommerceSystem.GUI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                foreach (var entry in ModelState)
-                {
-                    foreach (var error in entry.Value.Errors)
-                    {
-                        _logger.LogWarning("Lỗi trường {Field}: {Error}", entry.Key, error.ErrorMessage);
-                    }
-                }
-
-                ViewBag.ErrorMessage = "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.";
+                ViewBag.ErrorMessage = "Dữ liệu không hợp lệ.";
                 return View(model);
             }
 
-            try
+            var (success, token, role) = await _authService.LoginAsync(model);
+            if (!success)
             {
-                var (success, role) = await _authService.LoginAsync(model);
-
-                if (!success || string.IsNullOrEmpty(role))
-                {
-                    _logger.LogWarning("Failed login attempt for username: {Username}", model.Username);
-                    ViewBag.ErrorMessage = "Tên đăng nhập hoặc mật khẩu không đúng.";
-                    return View(model);
-                }
-
-                _logger.LogInformation("Successful login for username: {Username}", model.Username);
-
-                // Tạo claims
-                var claims = new List<Claim>
-{
-    new Claim(ClaimTypes.Name, model.Username),
-    new Claim(ClaimTypes.Role, role) // Rất quan trọng
-};
-
-                // Tạo identity & principal
-                var identity = new ClaimsIdentity(claims, "MyCookieAuth");
-                var principal = new ClaimsPrincipal(identity);
-
-                // Đăng nhập bằng cookie
-                await HttpContext.SignInAsync("MyCookieAuth", principal, new AuthenticationProperties
-                {
-                    IsPersistent = true,
-                    ExpiresUtc = DateTime.UtcNow.AddHours(3)
-                });
-
-                // Điều hướng theo vai trò
-                return role switch
-                {
-                    "Admin" => RedirectToAction("Index", "Admin"),
-                    "Customer" => RedirectToAction("Index", "Home"),
-                    _ => RedirectToAction("Index", "Home")
-                };
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error during login attempt for username: {Username}", model.Username);
-                ViewBag.ErrorMessage = "Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại sau.";
+                ViewBag.ErrorMessage = "Tên đăng nhập hoặc mật khẩu không đúng.";
                 return View(model);
-            }   
+            }
+
+            TempData["UserRole"] = role;
+            return RedirectToAction("CheckOnboarding");
         }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> CheckOnboarding()
+        {
+            // Lấy từ TempData, nếu không có thì lấy từ token
+            var role = TempData["UserRole"]?.ToString()
+                    ?? _authService.GetRoleFromToken();
+
+            if (string.IsNullOrEmpty(role))
+            {
+                _logger.LogWarning("Không xác định được vai trò người dùng.");
+                return RedirectToAction("Login"); // fallback an toàn
+            }
+
+            if (role == "User")
+            {
+                var isOnboarded = await _authService.IsOnboardingCompletedAsync();
+                if (!isOnboarded)
+                {
+                    var step = await _authService.GetCurrentStepAsync();
+                    return RedirectToAction($"Index", "Onboarding");
+                }
+            }
+
+            return role switch
+            {
+                "Admin" => RedirectToAction("Index", "Admin"),
+                "User" => RedirectToAction("Index", "Home"),
+                _ => RedirectToAction("Index", "Home")
+            };
+        }
+
+
 
         [HttpGet]
         public IActionResult Register()
@@ -124,14 +114,16 @@ namespace ECommerceSystem.GUI.Controllers
 
             try
             {
-                var success = await _authService.RegisterAsync(model);
+                var (success, message) = await _authService.RegisterAsync(model);
 
                 if (!success)
                 {
-                    _logger.LogWarning("Đăng ký thất bại cho username: {Username}", model.UserName);
-                    ViewBag.ErrorMessage = "Đăng ký thất bại. Vui lòng thử lại.";
+                    ViewBag.ErrorMessage = message;
                     return View(model);
                 }
+
+
+                
 
                 _logger.LogInformation("Đăng ký thành công cho username: {Username}", model.UserName);
                 TempData["SuccessMessage"] = "Đăng ký thành công! Vui lòng đăng nhập.";
