@@ -1,0 +1,59 @@
+﻿@model IEnumerable<ECommerceSystem.Shared.DTOs.Pet.PetListDto>
+@{
+    ViewData["Title"] = "Quản lý Thú cưng";
+    Layout = "_AdminLayout";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p><a asp-action="Create" class="btn btn-primary">Thêm mới Thú cưng</a></p>
+
+<table class="table align-middle">
+    <thead>
+        <tr>
+            @* BƯỚC 1: Thêm tiêu đề cột cho ảnh *@
+            <th>Ảnh</th>
+            <th>Tên</th>
+            <th>Giống</th>
+            <th>Giá</th>
+            <th>Trạng thái</th>
+            <th>Vị trí</th>
+<th>Sức khỏe</th>
+<th>Lượt xem</th>
+<th>Tuổi</th>
+<th>Loại</th>
+
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                @* BƯỚC 2: Thêm ô chứa ảnh *@
+                <td>
+                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                        <img src="@item.ImageUrl" alt="@item.Name" style="width: 70px; height: 70px; object-fit: cover; border-radius: 5px;" />
+                    }
+                </td>
+                <td>@item.Name</td>
+                <td>@item.Breed</td>
+                <td>@item.Price.ToString("C")</td>
+                <td>@(item.IsActive ? "Đang hoạt động" : "Ẩn")</td>
+                <td>@item.Location</td>
+<td>@item.HealthStatus</td>
+<td>@item.Views</td>
+<td>@item.Age</td>
+<td>@item.PetType</td>
+
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Sửa</a>
+                    <form asp-action="DeleteConfirmed" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

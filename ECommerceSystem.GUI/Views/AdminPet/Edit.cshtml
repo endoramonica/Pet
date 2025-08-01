@@ -1,0 +1,19 @@
+﻿@model ECommerceSystem.GUI.Models.PetDetailViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa Thú cưng";
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <partial name="_PetForm" model="Model" />
+            <div class="form-group mt-3">
+                <input type="submit" value="Lưu thay đổi" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+            </div>
+        </form>
+    </div>
+</div>

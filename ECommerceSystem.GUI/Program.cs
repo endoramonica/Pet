@@ -123,6 +123,12 @@ static void ConfigureRefit(IServiceCollection services)
     services.AddRefitClient<IAdminApi>()
       .AddHttpMessageHandler<AuthRetryHandler>()
       .ConfigureHttpClient(SetHttpClient);
+    services.AddRefitClient<IPetApi>()
+      .AddHttpMessageHandler<AuthRetryHandler>()
+      .ConfigureHttpClient(SetHttpClient);
+    services.AddRefitClient<IUserPetApi>()
+      .AddHttpMessageHandler<AuthRetryHandler>()
+      .ConfigureHttpClient(SetHttpClient);
 
     services.AddRefitClient<IOnboardingApi>()
        .AddHttpMessageHandler<AuthRetryHandler>()

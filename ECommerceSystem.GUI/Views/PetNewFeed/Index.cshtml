@@ -1,0 +1,16 @@
+﻿@model ECommerceSystem.GUI.Models.NewFeedViewModel
+
+@{
+    ViewData["Title"] = "Pet New Feed";
+    var sectionId = 0;
+    Layout = "_Layout";
+}
+
+<h2 class="text-2xl font-semibold mb-4">Newly Added Pets</h2>
+@Html.Partial("_PetCarouselSection", (Model.NewPets, $"section{++sectionId}", "Newly Added"))
+
+<h2 class="text-2xl font-semibold mt-8 mb-4">Popular Pets</h2>
+@Html.Partial("_PetCarouselSection", (Model.PopularPets, $"section{++sectionId}", "Popular"))
+
+<h2 class="text-2xl font-semibold mt-8 mb-4">Random Pets</h2>
+@Html.Partial("_PetCarouselSection", (Model.RandomPets, $"section{++sectionId}", "Random"))

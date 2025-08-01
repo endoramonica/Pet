@@ -5,6 +5,18 @@ namespace ECommerceSystem.Api.Mappers
 {
     public static class Mapper
     {
+        public static PetListDto MapToPetListDto(this Pet pet) =>
+    new PetListDto
+    {
+        Id = pet.Id,
+        Name = pet.Name,
+        Price = pet.Price,
+        ImageUrl = pet.ImageUrl,
+        PetType = pet.PetType,
+        Location = pet.Location
+        // Thêm các trường khác nếu cần
+    };
+
         public static PetDetailDto MapToPetDetailDto(this Pet pet) =>
             new PetDetailDto
             {

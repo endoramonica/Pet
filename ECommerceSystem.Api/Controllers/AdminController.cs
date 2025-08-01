@@ -1,6 +1,5 @@
 ﻿using ECommerceSystem.Api.Data;
 using ECommerceSystem.Api.Data.Mongo;
-using ECommerceSystem.Shared.DTOs;
 using ECommerceSystem.Shared.DTOs.Product;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +12,7 @@ using System.Threading.Tasks;
 namespace ECommerceSystem.Api.Controllers
 {
     [Authorize(Roles = "Admin")]
-    
+
     [Route("api/admin")]
     [ApiController]
     public class AdminController : ControllerBase
@@ -159,3 +158,4 @@ namespace ECommerceSystem.Api.Controllers
         }
     }
 }
+

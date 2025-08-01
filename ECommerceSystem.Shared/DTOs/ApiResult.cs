@@ -23,4 +23,5 @@ namespace ECommerceSystem.Shared.DTOs
         public static ApiResult<T> Fail(List<string> errors, string message = "Dữ liệu không hợp lệ.") =>
             new() { Success = false, Message = message, Errors = errors };
     }
+
 }

@@ -16,12 +16,16 @@
             if (user.Identity?.IsAuthenticated == true)
             {
                 var onboardingClaim = user.FindFirst("IsOnboardingCompleted")?.Value;
+                var role = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
 
-                if (onboardingClaim == "false")
+                var isAdmin = role == "Admin"; // ✅ Loại trừ Admin
+                var isOnboardingIncomplete = onboardingClaim == "false";
+
+                if (isOnboardingIncomplete && !isAdmin)
                 {
                     var path = context.Request.Path.Value?.ToLower();
 
-                    // Chỉ cho phép các đường dẫn onboarding, auth
+                    // Chỉ cho phép đi qua các API liên quan tới onboarding hoặc auth
                     if (!path.StartsWith("/api/onboarding") && !path.StartsWith("/api/auth"))
                     {
                         context.Response.StatusCode = StatusCodes.Status403Forbidden;
@@ -37,5 +41,4 @@
             await _next(context);
         }
     }
-
 }

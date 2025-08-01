@@ -1,5 +1,4 @@
 ﻿using ECommerceSystem.Shared.DTOs.Models;
-using ECommerceSystem.Shared.DTOs.Product;
 using ECommerceSystem.Shared.DTOs.User;
 using Refit;
 using System.Collections.Generic;
@@ -23,19 +22,6 @@ namespace ECommerceSystem.GUI.Apis
         Task<RefreshTokenResponse> Refresh([Body] RefreshTokenRequest model);
     }
 
-    // Admin API
-    public interface IAdminApi
-    {
-        [Get("/api/admin/statistics")]
-        Task<StatisticDTO> GetStatisticsAsync([Query] string type, [Query] string? period = null);
-
-        [Get("/api/admin/inventory")]
-        Task<ApiInventoryResponse> GetInventoryAsync();
-
-        [Get("/api/admin/user-activity")]
-        Task<ApiUserActivityResponse> GetUserActivityAsync();
-    }
-
     public class ApiInventoryResponse
     {
         public List<object> LowStock { get; set; } = new();
@@ -44,30 +30,5 @@ namespace ECommerceSystem.GUI.Apis
     public class ApiUserActivityResponse
     {
         public List<object> Activities { get; set; } = new();
-    }
-
-    // User API
-    public interface IUserApi
-    {
-        [Get("/api/admin/users")]
-        Task<List<UserDTO>> GetAllAsync();
-
-        [Get("/api/admin/users/{id}")]
-        Task<UserDTO> GetByIdAsync(string id);
-
-        [Post("/api/admin/users")]
-        Task CreateAsync([Body] UserDTO dto);
-
-        [Put("/api/admin/users/{id}")]
-        Task UpdateAsync(string id, [Body] UserDTO dto);
-
-        [Delete("/api/admin/users/{id}")]
-        Task SoftDeleteAsync(string id);
-
-        [Post("/api/admin/users/delete-multiple")]
-        Task SoftDeleteMultipleAsync([Body] List<string> ids);
-
-        [Get("/api/admin/users/search")]
-        Task<List<UserDTO>> SearchByNameAsync([Query] string name);
     }
 }

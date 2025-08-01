@@ -1,0 +1,58 @@
+﻿@model (List<ECommerceSystem.Shared.DTOs.Pet.PetListDto> Pets, string SectionId, string Title)
+
+<div class="swiper mySwiper" id="@Model.SectionId">
+    <div class="swiper-wrapper">
+        @foreach (var pet in Model.Pets)
+        {
+            <div class="swiper-slide">
+                <!-- Bọc thẻ a ở đây -->
+                <a asp-controller="Pet" asp-action="Detail" asp-route-id="@pet.Id" class="block">
+                    <div class="grid grid-cols-1">
+                        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                            <img src="@pet.ImageUrl" class="w-full h-48 object-cover" />
+                            <div class="p-4">
+                                <h3 class="text-lg font-semibold">@pet.Name</h3>
+                                <p class="text-sm text-gray-500">@pet.Breed | @pet.Location</p>
+                                <p class="text-green-600 font-bold mt-2">$@pet.Price</p>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+    <!-- Các nút điều hướng và phân trang giữ nguyên -->
+    <div class="swiper-button-next"></div>
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-pagination"></div>
+</div>
+
+<script>
+    new Swiper("#@Model.SectionId", {
+        slidesPerView: 1,
+        spaceBetween: 10,
+        loop: true,
+        autoplay: {
+            delay: 3000,
+        },
+        navigation: {
+            nextEl: "#@Model.SectionId .swiper-button-next",
+            prevEl: "#@Model.SectionId .swiper-button-prev",
+        },
+        pagination: {
+            el: "#@Model.SectionId .swiper-pagination",
+            clickable: true,
+        },
+        breakpoints: {
+            640: {
+                slidesPerView: 1,
+            },
+            768: {
+                slidesPerView: 2,
+            },
+            1024: {
+                slidesPerView: 3,
+            }
+        }
+    });
+</script>
